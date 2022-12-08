@@ -1,0 +1,10 @@
+{
+    "dev": {
+        "driver": "pg",
+        "user": "roguelite",
+        "password": "roguelite",
+        "host": "postgres",
+        "database": "roguelite"
+    },
+    "sql-file": true
+}

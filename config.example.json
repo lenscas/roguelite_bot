@@ -1,0 +1,65 @@
+{
+    "discordToken": "YOUR_TOKEN_HERE",
+    "commandPrefix": "~",
+    "cooldown": 5,
+    "tile_config": {
+        "name": "assets/dungeon.png",
+        "size": 16,
+        "locations": {
+            "void": [
+                [
+                    0,
+                    0
+                ]
+            ],
+            "wall": [
+                [
+                    0,
+                    2
+                ],
+                [
+                    1,
+                    2
+                ]
+            ],
+            "floor": [
+                [
+                    0,
+                    9
+                ],
+                [
+                    1,
+                    9
+                ],
+                [
+                    2,
+                    9
+                ],
+                [
+                    0,
+                    10
+                ],
+                [
+                    1,
+                    10
+                ],
+                [
+                    2,
+                    10
+                ],
+                [
+                    0,
+                    11
+                ],
+                [
+                    1,
+                    11
+                ],
+                [
+                    2,
+                    11
+                ]
+            ]
+        }
+    }
+}

@@ -1,0 +1,114 @@
+import Dungeon from '2d-dungeon';
+
+import sharp, { OverlayOptions } from 'sharp';
+
+import conf from '../../config.json';
+
+export const get_neighbours = (dungeon: ExportedDungeon, toCheckX: number, toCheckY: number) => {
+    return [
+        dungeon[toCheckX + 1] ? dungeon[toCheckX + 1][toCheckY] : undefined,
+        dungeon[toCheckX - 1] ? dungeon[toCheckX - 1][toCheckY] : undefined,
+        dungeon[toCheckX][toCheckY + 1],
+        dungeon[toCheckX][toCheckY - 1],
+    ];
+};
+
+type Vector2 = [number, number];
+
+const compareNeighbours = (dungeon: ExportedDungeon, location: Vector2, check: (a: DungeonTile) => boolean) => {
+    return get_neighbours(dungeon, location[0], location[1])
+        .map((x) => x || 'w')
+        .map(check)
+        .every((x) => x);
+};
+
+export const clean_up_dungeon = (dungeon: ExportedDungeon): ExportedDungeon => {
+    return dungeon.map((row, x) => {
+        return row.map((tile, y) => {
+            if (tile == 'w') {
+                const surroundedByWalls = compareNeighbours(dungeon, [x, y], (tile) => tile == 'v' || tile == 'w');
+                if (surroundedByWalls) {
+                    return 'v';
+                } else {
+                    return 'w';
+                }
+            }
+            return tile;
+        });
+    });
+};
+
+export const IsNever = (x: never): never => {
+    throw new Error('IsNever got called. Got value: ' + x);
+};
+
+export const exported_dungeon_to_image = async (dungeon: ExportedDungeon): Promise<Buffer> => {
+    const images = await split_image();
+    const size = conf.tile_config.size;
+
+    const config: OverlayOptions[] = dungeon
+        .flatMap((row, y) =>
+            row
+                .map((tile) => {
+                    return images[dungeon_tiles[tile]][0];
+                })
+                .map((tile, x) => ({ tile, y, x })),
+        )
+        .map((x) => {
+            return {
+                left: x.x * size,
+                top: x.y * size,
+                input: x.tile,
+                //raw: { height: size, width: size, channels: 3 },
+            };
+        });
+    return await sharp({
+        create: {
+            background: { r: 0, g: 0, b: 0 },
+            channels: 3,
+            height: dungeon.length * size,
+            width: dungeon[0].length * size,
+        },
+        unlimited: true,
+    })
+        .composite(config)
+        .png()
+        .toBuffer();
+};
+
+const extract = async (picture_location: string, locations: number[][]) => {
+    const size = conf.tile_config.size;
+    return Promise.all(
+        locations.map((tile) => {
+            const a = sharp(picture_location);
+            a.metadata().then((x) => console.log('image size:' + x.width + ',' + x.height));
+            console.log(size * tile[1] + ' , ' + size * tile[0]);
+            return a
+                .extract({
+                    top: size * tile[1],
+                    left: size * tile[0],
+                    width: size,
+                    height: size,
+                })
+                .toBuffer();
+        }),
+    );
+};
+
+const split_image = async () => {
+    console.log('Current directory:', __dirname);
+    console.log('Current directory:', process.cwd());
+    //const v = sharp('./assets/dungeon.png');
+
+    const voids = await extract('./assets/dungeon.png', conf.tile_config.locations.void);
+    console.log('starting walls');
+    const wall = await extract('./assets/dungeon.png', conf.tile_config.locations.wall);
+    console.log('starting foors');
+    const floor = await extract('./assets/dungeon.png', conf.tile_config.locations.floor);
+    const res: Record<DungeonTileTypes, Buffer[]> = { void: voids, wall, floor, start: floor };
+    return res;
+};
+
+export function dungeon_to_text(dungeon: ExportedDungeon): string {
+    return dungeon.map((x) => x.join('')).join('\n');
+}
