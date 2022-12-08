@@ -26,7 +26,7 @@
     "@types/node": "^16",
     "cli-table3": "^0.6.0",
     "discord-api-types": "^0.33.5",
-    "discord.js": "^13",
+    "discord.js": "^14",
     "pg": "^8.3.3",
     "random-seed": "^0.3.0",
     "sharp": "^0.31.2"
