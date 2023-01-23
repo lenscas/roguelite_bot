@@ -25,7 +25,7 @@
     "@pgtyped/query": "^1",
     "@types/node": "^16",
     "cli-table3": "^0.6.0",
-    "discord-api-types": "^0.33.5",
+    "discord-api-types": "^0.37.29",
     "discord.js": "^13",
     "pg": "^8.3.3",
     "random-seed": "^0.3.0",
